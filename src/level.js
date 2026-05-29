@@ -37,9 +37,19 @@ export const spawns = [
   { x: 660, y: 280 }, { x: 1060, y: 310 }, { x: 1370, y: 365 }, { x: 860, y: 150 },
 ];
 
-export function solidAt(x, y, w, h) {
-  for (let i = 0; i < solids.length; i++) {
-    const s = solids[i];
+export function solidAt(x, y, w, h, wallsOnly) {
+  const list = wallsOnly ? walls : solids;   // wallsOnly skips floating platforms (up-dash phasing)
+  for (let i = 0; i < list.length; i++) {
+    const s = list[i];
+    if (x < s.x + s.w && x + w > s.x && y < s.y + s.h && y + h > s.y) return s;
+  }
+  return null;
+}
+
+// true if the box overlaps a floating platform — used to know when an up-dash has cleared one.
+export function platAt(x, y, w, h) {
+  for (let i = 0; i < plats.length; i++) {
+    const s = plats[i];
     if (x < s.x + s.w && x + w > s.x && y < s.y + s.h && y + h > s.y) return s;
   }
   return null;

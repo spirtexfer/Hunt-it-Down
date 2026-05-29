@@ -137,22 +137,23 @@ function drawParts() {
 
 function drawActor(a, x, y, core, glow, isPrey) {
   const cx = x + a.w / 2, cy = y + a.h / 2;
-  // trail / afterimages
+  // trail / afterimages — brighter and fatter while dashing
+  const dashing = a.dashTime > 0;
   for (let i = 0; i < a.trail.length; i++) {
     const t = a.trail[i], k = i / a.trail.length;
-    const al = (a.dashTime > 0 ? 0.40 : 0.22) * k;
+    const al = (dashing ? 0.55 : 0.24) * k;
     ctx.fillStyle = glow + al + ')';
-    const r = (a.w * 0.42) * k;
+    const r = (a.w * (dashing ? 0.52 : 0.42)) * k;
     ctx.beginPath(); ctx.arc(t.x, t.y, r, 0, Math.PI * 2); ctx.fill();
   }
   // motion blur — smear across this tick's travel, scales with speed
   const sm = Math.hypot(a.vx, a.vy);
-  if (sm > 3) {
-    const copies = Math.min(14, Math.round(sm / 1.1));
+  if (sm > 2.5) {
+    const copies = Math.min(20, Math.round(sm / 0.85));
     ctx.fillStyle = core;
     for (let k = 1; k <= copies; k++) {
       const f = k / (copies + 1);
-      ctx.globalAlpha = 0.40 * (1 - f);
+      ctx.globalAlpha = 0.50 * (1 - f);
       roundRect(cx - a.vx * f - a.w / 2, cy - a.vy * f - a.h / 2, a.w, a.h, 7);
       ctx.fill();
     }

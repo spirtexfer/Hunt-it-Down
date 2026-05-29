@@ -15,10 +15,16 @@ export const WALL_SLIDE_MAX = 2.8, WALLJUMP_X = 7.4, WALLJUMP_VY = -11.0, WALLJU
 export const DASH_SPEED = 15.0, DASH_TIME = 10, DASH_END_KEEP = 0.97; // big launch, keeps speed -> fly far
 export const PLAYER_DASH_MAX = 3, PLAYER_DASH_REGEN = 3 / 120;        // 3 dashes; empty->full in ~2s
 
+// ---- dive-bounce / hyperdash (a downward dash converts on floor contact) ----
+export const DIVE_PURE_VEL = 16.5;    // pure-straight-down dash -> fixed vertical stomp-bounce
+export const DIVE_VERT_MAX = 15.0;    // diagonal dive: max upward bounce (reached at full launch height)
+export const DIVE_HEIGHT_RANGE = 150; // launch height above the floor (px) that maps to the max bounce
+export const DIVE_HYPER_SPEED = 16.0; // diagonal dive: horizontal skim speed out the other side (× actor spd)
+
 // ---- prey balance (no dash; it just runs fast) ----
-export const PREY_SPEED_MULT = 1.16;   // prey base run = this × your base run speed (lower = easier)
-export const PREY_SPEED_GROWTH = 0.02; // added to the multiplier per catch (0 = no ramp)
-export const PREY_SPEED_CAP = 1.55;    // ceiling on the multiplier
+export const PREY_SPEED_MULT = 1.40;   // prey base run = this × your base run speed (lower = easier)
+export const PREY_SPEED_GROWTH = 0;    // no per-catch ramp — speed is constant all run (authored difficulty)
+export const PREY_SPEED_CAP = 1.90;    // ceiling on the multiplier (unused while growth = 0)
 
 // ---- prey AI feel (all deterministic — no RNG, so runs are reproducible) ----
 export const PREY_LOOKAHEAD = 11;   // ticks of shadow-velocity it anticipates (higher = dodges your dash harder)

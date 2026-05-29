@@ -21,6 +21,7 @@ function reset() {
   const { player, prey } = game;
   player.dashMax = C.PLAYER_DASH_MAX; player.dashRegen = C.PLAYER_DASH_REGEN; player.dashCharge = C.PLAYER_DASH_MAX;
   player.fricG = C.PLAYER_FRIC_G; player.fricA = C.PLAYER_FRIC_A; player.gravMult = 0.9; player.bounce = C.PLAYER_BOUNCE; // you slide, float & bounce
+  player.trailLen = 22;                                    // longer afterimage tail than the prey
   prey.dashMax = 0; prey.dashCharge = 0;                    // prey can't dash — it just runs fast
   prey.spd = C.PREY_SPEED_MULT; prey.invuln = 20;
   game.cam.x = clamp(player.x - C.VIEW_W / 2, 0, C.WORLD_W - C.VIEW_W);
