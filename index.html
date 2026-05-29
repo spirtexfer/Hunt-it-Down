@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AFTERIMAGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --you:#ff3a8c;
+    --you-glow:#ff66b2;
+    --prey:#5fe8ff;
+    --prey-glow:#bff7ff;
+    --ink:#07030d;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#000;overflow:hidden;
+    font-family:'Chakra Petch','Segoe UI',ui-monospace,monospace;
+    color:#f3e9ff;-webkit-font-smoothing:antialiased;touch-action:none;cursor:default}
+  #wrap{position:fixed;inset:0;display:grid;place-items:center}
+  canvas{display:block;image-rendering:auto;background:#000;
+    box-shadow:0 0 80px rgba(120,40,160,.25)}
+  /* overlay screens */
+  .screen{position:fixed;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;
+    background:radial-gradient(ellipse at 50% 35%,rgba(40,10,55,.55),rgba(5,2,12,.92));
+    backdrop-filter:blur(2px);z-index:10;gap:6px;padding:24px}
+  .hidden{display:none!important}
+  h1{font-weight:700;font-size:clamp(38px,9vw,92px);letter-spacing:.18em;
+    line-height:.95;background:linear-gradient(180deg,#ffd2ea,#ff3a8c 55%,#7a1648);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 40px rgba(255,58,140,.35);margin-bottom:2px}
+  h1::after{content:'';display:block}
+  .tag{color:#caa9d6;letter-spacing:.32em;font-size:clamp(10px,2.4vw,15px);
+    text-transform:uppercase;opacity:.9}
+  .panel{margin-top:26px;max-width:520px;width:100%;
+    border:1px solid rgba(255,140,200,.18);border-radius:14px;
+    background:rgba(20,8,30,.5);padding:18px 20px}
+  .keys{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;
+    font-size:14px;text-align:left;color:#e7d6f2}
+  .keys b{color:var(--you);font-weight:600;letter-spacing:.06em}
+  kbd{display:inline-block;min-width:20px;padding:2px 7px;margin:0 1px;
+    border:1px solid rgba(255,180,220,.3);border-bottom-width:2px;border-radius:6px;
+    background:rgba(255,120,180,.08);font:inherit;font-size:12px;color:#ffd6ea}
+  .cta{margin-top:24px;font-size:clamp(13px,3vw,17px);letter-spacing:.22em;
+    color:#fff;text-transform:uppercase;animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+  .stat{font-size:clamp(22px,5vw,34px);letter-spacing:.04em;color:#fff}
+  .stat .num{color:var(--prey);text-shadow:0 0 24px rgba(95,232,255,.5)}
+  .sub{color:#b79cc6;letter-spacing:.1em;font-size:13px;text-transform:uppercase}
+  .small{font-size:12px;color:#8d7a9c;letter-spacing:.14em;margin-top:18px}
+  .you-dot{color:var(--you);text-shadow:0 0 16px var(--you)}
+  .prey-dot{color:var(--prey);text-shadow:0 0 16px var(--prey)}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="c"></canvas></div>
+
+<div id="title" class="screen">
+  <h1>AFTERIMAGE</h1>
+  <div class="tag">You are the <span class="you-dot">shadow</span>. Catch the <span class="prey-dot">light</span>.</div>
+  <div class="panel">
+    <div class="keys">
+      <b>Move</b><span><kbd>A</kbd><kbd>D</kbd> &nbsp;(you <i>fly</i> — momentum carries you)</span>
+      <b>Jump</b><span><kbd>W</kbd> &nbsp;(hold for height &middot; walls <i>bounce</i> you)</span>
+      <b>Dash</b><span><kbd>Space</kbd> &nbsp;3 charges (refill ~2s) &middot; aim <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> &middot; <i>instantly</i> redirects you</span>
+      <b>Restart</b><span><kbd>R</kbd></span>
+    </div>
+  </div>
+  <div class="cta">Press any key to hunt</div>
+  <div class="small">Catch the light <span id="targetTxt">8</span> times. Go fast.</div>
+</div>
+
+<div id="end" class="screen hidden">
+  <div class="tag" style="margin-bottom:10px">RUN COMPLETE</div>
+  <div class="stat">caught in <span class="num" id="endTime">0.00</span>s</div>
+  <div class="sub" id="bestLine" style="margin-top:14px"></div>
+  <div class="cta" style="margin-top:30px">Press <kbd style="font-size:15px">R</kbd> to run again</div>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
