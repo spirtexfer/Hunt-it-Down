@@ -25,7 +25,7 @@ export const DIVE_HEIGHT_RANGE = 150; // launch height above the floor (px) that
 export const DIVE_HYPER_SPEED = 16.0; // diagonal dive: horizontal skim speed out the other side (× actor spd)
 
 // ---- prey balance (no dash; it just runs fast) ----
-export const PREY_SPEED_MULT = 1.45;   // prey base run = this × your base run speed (lower = easier). It
+export const PREY_SPEED_MULT = 2.25;   // prey base run = this × your base run speed (lower = easier). It
                                        // out-runs you on foot; only a dash (much faster) can close.
 export const PREY_SPEED_GROWTH = 0;    // no per-catch ramp — speed is constant all run (authored difficulty)
 export const PREY_SPEED_CAP = 1.90;    // ceiling on the multiplier (unused while growth = 0)

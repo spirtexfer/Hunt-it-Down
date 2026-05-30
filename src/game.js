@@ -6,7 +6,7 @@ import { game, screen } from './state.js';
 import { cv, resize } from './view.js';
 import { parts, updateParts, burst, ring } from './fx.js';
 import { makeActor, step, clamp } from './physics.js';
-import { aiInput } from './ai.js';
+import { preyAI } from './preyAI.js';   // trained PPO prey (falls back to the heuristic until loaded)
 import { render } from './render.js';
 
 // ---------- best-time persistence ----------
@@ -153,7 +153,7 @@ function tick() {
   const { player, prey } = game;
   const pin = { left: !!keys.left, right: !!keys.right, up: !!keys.up, down: !!keys.down, jump: !!keys.jump, dash: !!keys.dash };
   step(player, pin, true);
-  step(prey, aiInput(prey, player), false);
+  step(prey, preyAI(prey, player), false);
 
   // catch test (small margin so high-speed fly-bys still register)
   const M = 5;

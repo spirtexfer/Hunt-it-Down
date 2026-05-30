@@ -46,10 +46,11 @@ export const plats = [
 export const solids = walls.concat(plats);
 
 // prey spawn points (one just above a ledge), spread across the whole arena.
+// Interior spawn points only — each sits on a mid-map platform with room to flee in multiple
+// directions, so the prey is never dumped into a walled-off corner (which would give it no chance).
 export const spawns = [
-  { x: 398, y: 146 }, { x: 789, y: 72 }, { x: 1444, y: 72 }, { x: 916, y: 222 },
-  { x: 662, y: 446 }, { x: 1180, y: 296 }, { x: 134, y: 596 }, { x: 1444, y: 372 },
-  { x: 1180, y: 672 }, { x: 789, y: 746 },
+  { x: 450, y: 296 }, { x: 662, y: 446 }, { x: 398, y: 521 }, { x: 662, y: 596 }, { x: 398, y: 671 },
+  { x: 916, y: 221 }, { x: 1180, y: 296 }, { x: 916, y: 371 }, { x: 1050, y: 521 }, { x: 1180, y: 671 },
 ];
 
 export function solidAt(x, y, w, h, wallsOnly) {
