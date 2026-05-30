@@ -1,10 +1,12 @@
 // Arena geometry: collidable boundary box + floating ledges, prey spawn points, and the
 // broadphase-free AABB query everything uses for collision.
+//
+// Layout: a 180° point-symmetric field — a left half + its exact rotation as the right half, on an
+// even 75px vertical ladder, plus long shelves and centred top/bottom ledges.
 import { WORLD_W, WORLD_H } from './config.js';
 
 export const WALL_T = 24;
 
-// Visible boundary box (collidable)
 export const walls = [
   { x: 0, y: 0, w: WALL_T, h: WORLD_H },                  // left wall
   { x: WORLD_W - WALL_T, y: 0, w: WALL_T, h: WORLD_H },   // right wall
@@ -12,29 +14,42 @@ export const walls = [
   { x: 0, y: WORLD_H - WALL_T, w: WORLD_W, h: WALL_T },   // floor
 ];
 
-// Open floating ledges (no pillars, no dead ends)
 export const plats = [
-  { x: 150, y: 715, w: 250, h: 22 },
-  { x: 540, y: 655, w: 230, h: 22 },
-  { x: 910, y: 705, w: 250, h: 22 },
-  { x: 1230, y: 650, w: 240, h: 22 },
-  { x: 340, y: 525, w: 230, h: 22 },
-  { x: 720, y: 475, w: 250, h: 22 },
-  { x: 1080, y: 530, w: 230, h: 22 },
-  { x: 170, y: 355, w: 230, h: 22 },
-  { x: 560, y: 315, w: 230, h: 22 },
-  { x: 960, y: 345, w: 240, h: 22 },
-  { x: 1290, y: 400, w: 210, h: 22 },
-  { x: 760, y: 185, w: 260, h: 22 },
+  // Equal width (160); 6 columns evenly spaced; even 75px vertical ladder (R4 == C2 == 415).
+  // LEFT half
+  { x: 329, y: 176.5, w: 160, h: 22 },   // L1
+  { x: 65,  y: 251.5, w: 160, h: 22 },   // L2
+  { x: 329, y: 326.5, w: 424, h: 22 },   // L3 (long shelf)
+  { x: 65,  y: 476.5, w: 160, h: 22 },   // L4
+  { x: 593, y: 476.5, w: 160, h: 22 },   // L5
+  { x: 329, y: 551.5, w: 160, h: 22 },   // L6
+  { x: 65,  y: 626.5, w: 160, h: 22 },   // L7
+  { x: 593, y: 626.5, w: 160, h: 22 },   // L8
+  { x: 329, y: 701.5, w: 160, h: 22 },   // L9
+  { x: 65,  y: 776.5, w: 160, h: 22 },   // L10
+  // RIGHT half — 180° point-reflection of the left half
+  { x: 1375, y: 101.5, w: 160, h: 22 },  // R1
+  { x: 1111, y: 176.5, w: 160, h: 22 },  // R2
+  { x: 847,  y: 251.5, w: 160, h: 22 },  // R3
+  { x: 1375, y: 251.5, w: 160, h: 22 },  // R4
+  { x: 1111, y: 326.5, w: 160, h: 22 },  // R5
+  { x: 847,  y: 401.5, w: 160, h: 22 },  // R6
+  { x: 1375, y: 401.5, w: 160, h: 22 },  // R7
+  { x: 847,  y: 551.5, w: 424, h: 22 },  // R8 (long shelf)
+  { x: 1375, y: 626.5, w: 160, h: 22 },  // R9
+  { x: 1111, y: 701.5, w: 160, h: 22 },  // R10
+  // CENTRE long platforms (centered on x800)
+  { x: 593, y: 101.5, w: 414, h: 22 },   // C1 (top)
+  { x: 593, y: 776.5, w: 414, h: 22 },   // C2 (bottom)
 ];
 
 export const solids = walls.concat(plats);
 
-// prey spawn points (all sit above an open platform)
+// prey spawn points (one just above a ledge), spread across the whole arena.
 export const spawns = [
-  { x: 250, y: 680 }, { x: 640, y: 620 }, { x: 1010, y: 670 }, { x: 1330, y: 615 },
-  { x: 440, y: 490 }, { x: 820, y: 440 }, { x: 1170, y: 495 }, { x: 270, y: 320 },
-  { x: 660, y: 280 }, { x: 1060, y: 310 }, { x: 1370, y: 365 }, { x: 860, y: 150 },
+  { x: 398, y: 146 }, { x: 789, y: 72 }, { x: 1444, y: 72 }, { x: 916, y: 222 },
+  { x: 662, y: 446 }, { x: 1180, y: 296 }, { x: 134, y: 596 }, { x: 1444, y: 372 },
+  { x: 1180, y: 672 }, { x: 789, y: 746 },
 ];
 
 export function solidAt(x, y, w, h, wallsOnly) {

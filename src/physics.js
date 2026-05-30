@@ -1,7 +1,7 @@
 // Actor model + the shared movement step (used by both player and prey). Collision is AABB vs
 // the level's solids, resolved X then Y. The player's bounce / dive-bounce techs live in moveX/moveY.
 import * as C from './config.js';
-import { solidAt, platAt } from './level.js';
+import { solidAt, platAt, plats } from './level.js';
 import { screen } from './state.js';
 import { burst, ring, onPlayerDash, phaseFx } from './fx.js';
 
@@ -32,6 +32,16 @@ function moveX(a) {
   a.x += a.vx;
   const s = solidAt(a.x, a.y + 1, a.w, a.h - 2, a.phasing);
   if (s) {
+    // edge boost (you): hitting the side edge of a platform (any height) rides you up onto its top
+    // and converts some horizontal momentum into an upward pop, instead of stopping. Boundary walls
+    // are excluded — they still bounce you.
+    if (a.bounce > 0 && plats.includes(s) && Math.abs(a.vx) > 3 && (a.y + a.h) > s.y && a.vy > -3) {
+      a.y = s.y - a.h;                         // ride up onto the top of the ledge
+      a.vy = -Math.abs(a.vx) * C.EDGE_BOOST_K;
+      a.vx *= C.EDGE_BOOST_KEEP;               // shed some horizontal flow (the cost of the skim)
+      if (Math.abs(a.vx) > 5) burst(a.x + a.w / 2, a.y + a.h, 6, 'rgba(255,170,210,', 0, 1.2);
+      return;
+    }
     const into = a.vx > 0;
     if (into) a.x = s.x - a.w; else a.x = s.x + s.w;
     if (a.bounce > 0 && Math.abs(a.vx) > 2) {
@@ -178,6 +188,7 @@ export function step(a, inp, isPlayer) {
     const onPlat = platAt(a.x, a.y, a.w, a.h);
     if (onPlat && onPlat !== a.lastPhasePlat && a.bounce > 0) {
       phaseFx(a.x + a.w / 2, onPlat.y + onPlat.h / 2);
+      a.vx *= C.PHASE_BREAK_KEEP; a.vy *= C.PHASE_BREAK_KEEP;   // drag for punching through
     }
     a.lastPhasePlat = onPlat || null;
     if (a.dashTime === 0 && !onPlat) a.phasing = false;

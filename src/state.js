@@ -12,6 +12,7 @@ export const game = {
   caught: 0,
   ticks: 0,
   running: false,
+  paused: false,
   won: false,
   started: false,
   best: null,

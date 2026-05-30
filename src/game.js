@@ -16,8 +16,9 @@ game.best = loadBest();
 
 // ---------- run lifecycle ----------
 function reset() {
-  game.player = makeActor(120, C.WORLD_H - 130, 24, 34, 1);
-  game.prey = makeActor(C.WORLD_W - 180, C.WORLD_H - 130, 22, 30, 1);
+  // spawn standing on the open floor near each side wall (clear of the new low ledges at y=792)
+  game.player = makeActor(120, C.WORLD_H - 58, 24, 34, 1);
+  game.prey = makeActor(C.WORLD_W - 180, C.WORLD_H - 54, 22, 30, 1);
   const { player, prey } = game;
   player.dashMax = C.PLAYER_DASH_MAX; player.dashRegen = C.PLAYER_DASH_REGEN; player.dashCharge = C.PLAYER_DASH_MAX;
   player.fricG = C.PLAYER_FRIC_G; player.fricA = C.PLAYER_FRIC_A; player.gravMult = 0.9; player.bounce = C.PLAYER_BOUNCE; // you slide, float & bounce
@@ -26,7 +27,7 @@ function reset() {
   prey.spd = C.PREY_SPEED_MULT; prey.invuln = 20;
   game.cam.x = clamp(player.x - C.VIEW_W / 2, 0, C.WORLD_W - C.VIEW_W);
   game.cam.y = clamp(player.y - C.VIEW_H / 2, 0, C.WORLD_H - C.VIEW_H);
-  game.caught = 0; game.ticks = 0; game.won = false; game.running = true;
+  game.caught = 0; game.ticks = 0; game.won = false; game.running = true; game.paused = false;
   screen.trauma = 0; screen.flash = 0; screen.freeze = 0;
   parts.length = 0;
 }
@@ -72,6 +73,9 @@ const map = {
   KeyA: ['left'], KeyD: ['right'],
   KeyW: ['up', 'jump'],
   KeyS: ['down'],
+  ArrowLeft: ['left'], ArrowRight: ['right'],
+  ArrowUp: ['up', 'jump'],
+  ArrowDown: ['down'],
   Space: ['dash'],
 };
 function startGame() {
@@ -79,17 +83,52 @@ function startGame() {
   document.getElementById('end').classList.add('hidden');
   game.started = true; reset();
 }
+function pauseGame() {
+  if (!game.running || game.paused) return;
+  game.paused = true;
+  screen.trauma = 0; screen.flash = 0; screen.freeze = 0;   // kill lingering shake/flash from a dash
+  for (const k in keys) keys[k] = false;   // drop held inputs so we don't lurch on resume
+  document.getElementById('pause').classList.remove('hidden');
+}
+function resumeGame() {
+  if (!game.paused) return;
+  game.paused = false;
+  document.getElementById('pause').classList.add('hidden');
+}
+// Modifier-only keys never count as "any key" (so a stray Shift/Ctrl can't dismiss a screen).
+const MODS = new Set(['ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight',
+  'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight', 'CapsLock', 'NumLock', 'ScrollLock']);
 addEventListener('keydown', e => {
-  if (e.code === 'KeyR') { if (game.started) { document.getElementById('end').classList.add('hidden'); reset(); } e.preventDefault(); return; }
-  if (!game.started) { startGame(); e.preventDefault(); return; }
-  if (game.won) return;
+  // Let browser shortcuts (Ctrl+R reload, Cmd+anything) pass through untouched — and never let
+  // the modifier held during a reload count as a press that dismisses the title screen.
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+  // Title screen: any real key press starts the run.
+  if (!game.started) {
+    if (e.repeat || MODS.has(e.code)) return;
+    startGame(); e.preventDefault(); return;
+  }
+  // End screen: R runs again.
+  if (game.won) {
+    if (e.code === 'KeyR') { startGame(); e.preventDefault(); }
+    return;
+  }
+  // Paused: any key resumes — except R, which restarts the run.
+  if (game.paused) {
+    if (e.repeat || MODS.has(e.code)) return;
+    if (e.code === 'KeyR') { reset(); document.getElementById('pause').classList.add('hidden'); }
+    else resumeGame();
+    e.preventDefault(); return;
+  }
+  // Running: Esc pauses.
+  if (e.code === 'Escape') { pauseGame(); e.preventDefault(); return; }
   const acts = map[e.code];
   if (acts) { for (const a of acts) keys[a] = true; e.preventDefault(); }
 });
 addEventListener('keyup', e => { const acts = map[e.code]; if (acts) { for (const a of acts) keys[a] = false; e.preventDefault(); } });
 cv.addEventListener('pointerdown', () => { if (!game.started) startGame(); });
 document.getElementById('title').addEventListener('pointerdown', () => { if (!game.started) startGame(); });
-addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+addEventListener('blur', () => { for (const k in keys) keys[k] = false; pauseGame(); });
 
 // ---------- loop ----------
 const STEP = 1000 / 60;
@@ -104,6 +143,7 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 function tick() {
+  if (game.paused) return;          // frozen while paused — render keeps drawing the static frame
   if (screen.trauma > 0) screen.trauma = Math.max(0, screen.trauma - 0.045);
   if (screen.flash > 0) screen.flash = Math.max(0, screen.flash - 0.06);
   if (!game.running) { updateParts(); return; }
