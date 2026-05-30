@@ -32,14 +32,16 @@ function moveX(a) {
   a.x += a.vx;
   const s = solidAt(a.x, a.y + 1, a.w, a.h - 2, a.phasing);
   if (s) {
-    // edge boost (you): hitting the side edge of a platform (any height) rides you up onto its top
-    // and converts some horizontal momentum into an upward pop, instead of stopping. Boundary walls
-    // are excluded — they still bounce you.
+    // edge boost (you): hitting the side edge of a platform rides you over the NEARER edge and turns
+    // horizontal momentum into a vertical pop (minus a skim cost), instead of stopping. If your
+    // centre is above the platform's middle you go up over the top; if it's below, you duck down
+    // under the bottom. Boundary walls are excluded — they still bounce you.
     if (a.bounce > 0 && plats.includes(s) && Math.abs(a.vx) > 3 && (a.y + a.h) > s.y && a.vy > -3) {
-      a.y = s.y - a.h;                         // ride up onto the top of the ledge
-      a.vy = -Math.abs(a.vx) * C.EDGE_BOOST_K;
+      const up = (a.y + a.h / 2) <= (s.y + s.h / 2);
+      if (up) { a.y = s.y - a.h;     a.vy = -Math.abs(a.vx) * C.EDGE_BOOST_K; }   // over the top
+      else    { a.y = s.y + s.h;     a.vy =  Math.abs(a.vx) * C.EDGE_BOOST_K; }   // under the bottom
       a.vx *= C.EDGE_BOOST_KEEP;               // shed some horizontal flow (the cost of the skim)
-      if (Math.abs(a.vx) > 5) burst(a.x + a.w / 2, a.y + a.h, 6, 'rgba(255,170,210,', 0, 1.2);
+      if (Math.abs(a.vx) > 5) burst(a.x + a.w / 2, up ? a.y + a.h : a.y, 6, 'rgba(255,170,210,', 0, up ? 1.2 : -1.2);
       return;
     }
     const into = a.vx > 0;
